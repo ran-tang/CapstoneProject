@@ -12,7 +12,6 @@ bigramMatch <- function(userInput){
   len <- length(userInput)
   filter(bigram, one == userInput[len]) %>% 
     top_n(1, n) %>%
-    #add_count(two, sort = TRUE) %>% 
     filter(row_number() == 1L) %>%
     select(two) %>%
     as.character() -> prediction
@@ -23,7 +22,6 @@ trigramMatch <- function(userInput){
   len <- length(userInput)
   filter(trigram, one==userInput[len-1], two==userInput[len]) %>% 
     top_n(1, n) %>%
-    #add_count(three, sort = TRUE) %>% 
     filter(row_number() == 1) %>%
     select(three) %>%
     as.character() -> prediction
@@ -34,7 +32,6 @@ quadgramMatch <- function(userInput){
   len <- length(userInput)
   filter(quadgram, one == userInput[len-2], two == userInput[len-1], three == userInput[len])  %>% 
     top_n(1, n) %>%
-    #add_count(four, sort = TRUE) %>% 
     filter(row_number() == 1) %>%
     select(four) %>%
     as.character() -> prediction
@@ -45,6 +42,7 @@ quadgramMatch <- function(userInput){
 #prediction
 ngrams <- function(userInput){
   userInput <- data_frame(text = userInput)
+  
   # Clean the Input
   userInput <- userInput %>%
     mutate(text = str_replace_all(text, "[^[:alpha:][:space:]]*", "")) %>%
@@ -53,6 +51,7 @@ ngrams <- function(userInput){
   userInput <- unlist(str_split(userInput, boundary("word")))
   userInput <- tolower(userInput)
   
+  #Use ngram matching, if blank, have awaiting input
   prediction <- ifelse(wordCnt >= 3, quadgramMatch(userInput),
                         ifelse(wordCnt == 2, trigramMatch(userInput), 
                                ifelse (wordCnt == 1, bigramMatch(userInput), "Awaiting Input" )))
